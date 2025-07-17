@@ -67,13 +67,14 @@ class SportCenterInfo:
             url = f"{self.BASE_URL}LID={location}&categoryId={self.category}&useDate={date}"
             headers = self.DEFAULT_HEADERS.copy()
             headers["Referer"] = url
+            response = None
             try:
                 response = requests.post(url, headers=headers, data=data)
                 results[location] = response.json()
             except Exception as e:
                 results[location] = {
                     "error": str(e),
-                    "text": getattr(response, "text", ""),
+                    "text": getattr(response, "text", "") if response is not None else "",
                 }
         return results
 

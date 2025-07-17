@@ -35,7 +35,7 @@ uv pip install -r requirements.txt
 1. 在專案目錄下開啟終端機。
 2. 執行 Streamlit 應用程式：
    ```bash
-   uv run streamlit run sport_center_info.py
+   uv run streamlit run src/sport_center_info.py
    ```
 3. 瀏覽器會自動開啟，請輸入運動類型、選擇日期/時間與場館，即可查詢可預約時段。
 
