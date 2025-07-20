@@ -67,13 +67,14 @@ class SportCenterInfo:
             url = f"{self.BASE_URL}LID={location}&categoryId={self.category}&useDate={date}"
             headers = self.DEFAULT_HEADERS.copy()
             headers["Referer"] = url
+            response = None
             try:
                 response = requests.post(url, headers=headers, data=data)
                 results[location] = response.json()
             except Exception as e:
                 results[location] = {
                     "error": str(e),
-                    "text": getattr(response, "text", ""),
+                    "text": getattr(response, "text", "") if response is not None else "",
                 }
         return results
 
@@ -123,6 +124,7 @@ class StreamlitUI:
 
     def __init__(self):
         st.title("Sport Center Booking Status")
+        self.date = date.today()
 
     def __getstate__(self):
         """
@@ -134,26 +136,28 @@ class StreamlitUI:
         """
         category = st.text_input("Enter category (e.g., Badminton):", "Badminton")
         date_range = st.date_input(
-            "Select date(s):", [date.today()], format="YYYY-MM-DD"
+            "Select date(s):", self._get_date_range(), format="YYYY-MM-DD"
         )
         time_selection = st.selectbox(
             "Select Time:", ["All Time", "Morning", "Afternoon", "Evening"]
         )
         location = st.selectbox("Select Location:", SportCenterInfo.LOCATIONS.keys())
 
-        if len(date_range) == 2:
-            s, e = pd.to_datetime(date_range[0]), pd.to_datetime(date_range[1])
-            date_range = [
-                (s + pd.Timedelta(days=i)).strftime("%Y-%m-%d")
-                for i in range((e - s).days + 1)
-            ]
-        else:
-            date_range = [pd.to_datetime(date_range).strftime("%Y-%m-%d")]
         logging.warning(
             f"Using category: {category}, date range: {date_range}, Time: {time_selection}, location: {location}"
         )
         return category, date_range, time_selection, location
 
+    def _get_date_range(self):
+        if isinstance(self.date, (list, tuple)) and len(self.date) == 2:
+            start, end = self.date[0], self.date[1]
+            self.date = [
+                (start + pd.Timedelta(days=i)).strftime("%Y-%m-%d")
+                for i in range((end - start).days + 1)
+            ]
+        else:
+            self.date = [pd.to_datetime(self.date).strftime("%Y-%m-%d")]
+        return self.date
 
 if __name__ == "__main__":
     if st is not None:

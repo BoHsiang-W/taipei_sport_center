@@ -30,9 +30,16 @@ uv pip install -r requirements.txt
 1. Open a terminal in the project directory.
 2. Run the Streamlit app:
    ```bash
-   uv run streamlit run sport_center_info.py
+   uv run streamlit run src/sport_center_info.py
    ```
 3. The app will open in your browser. Enter the category, select date(s), select time, and choose a location to view available slots.
+
+### Unit Tests
+Run the tests to ensure everything is working correctly:
+```bash
+uv run pytest --cov=. --cov-report=html:calc_cov .\tests\
+```
+That will generate a coverage report in the `calc_cov` directory.
 
 ### Project Structure
 - `sport_center_info.py` - Main Streamlit app and booking logic
