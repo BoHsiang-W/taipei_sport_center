@@ -1,5 +1,6 @@
 from unittest.mock import patch, MagicMock
-from src.sport_center_info import SportCenterInfo
+from src.sport_center_info import SportCenterInfo,StreamlitUI
+from datetime import datetime, timedelta
 
 def test_fetch_for_date_all_locations_success():
     mock_response = MagicMock()
@@ -91,3 +92,40 @@ def test_get_available_slots_time_range_none():
     # Should include slot since time_range is None (no filtering)
     assert len(slots) == 1
     assert slots[0]["Place"] == "Court 1"
+
+def test_streamlitui_getstate_returns_expected(monkeypatch):
+    mock_st = MagicMock()
+    mock_st.text_input.return_value = "Badminton"
+    mock_st.date_input.return_value = ["2024-06-01", "2024-06-02"]
+    mock_st.selectbox.side_effect = [
+        "Morning",  # time_selection
+        "文山",      # location
+    ]
+    monkeypatch.setattr("src.sport_center_info.st", mock_st)
+    ui = StreamlitUI()
+    with patch("logging.warning"):
+        state = ui.__getstate__()
+    assert state[0] == "Badminton"
+    assert state[1] == ["2024-06-01", "2024-06-02"]
+    assert state[2] == "Morning"
+    assert state[3] == "文山"
+
+def test_streamlitui_get_date_range_single_date():
+    ui = StreamlitUI()
+    ui.date = datetime.strptime("2024-06-01", "%Y-%m-%d")
+    with patch("pandas.to_datetime", side_effect=lambda x: x), \
+         patch("pandas.Timedelta", side_effect=lambda days=0: type("Delta", (), {"days": days})()):
+        result = ui._get_date_range()
+    assert result == ["2024-06-01"]
+
+def test_streamlitui_get_date_range_range():
+    ui = StreamlitUI()
+    ui.date = (
+        datetime.strptime("2024-06-01", "%Y-%m-%d"),
+        datetime.strptime("2024-06-03", "%Y-%m-%d"),
+    )
+    # Patch pd.Timedelta and pd.to_datetime to behave as expected
+    with patch("pandas.Timedelta", side_effect=lambda days=0: timedelta(days=days)), \
+         patch("pandas.to_datetime", side_effect=lambda x: x):
+        result = ui._get_date_range()
+    assert result == ["2024-06-01", "2024-06-02", "2024-06-03"]
