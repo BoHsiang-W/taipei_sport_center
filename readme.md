@@ -24,6 +24,9 @@ Install dependencies:
 uv venv -p 3.13
 # Install required packages
 uv pip install -r requirements.txt
+
+# Install pre-commit hooks
+uv run pre-commit install
 ```
 
 ### How to Run
