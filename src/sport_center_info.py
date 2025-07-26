@@ -74,7 +74,9 @@ class SportCenterInfo:
             except Exception as e:
                 results[location] = {
                     "error": str(e),
-                    "text": getattr(response, "text", "") if response is not None else "",
+                    "text": getattr(response, "text", "")
+                    if response is not None
+                    else "",
                 }
         return results
 
@@ -158,6 +160,7 @@ class StreamlitUI:
         else:
             self.date = [pd.to_datetime(self.date).strftime("%Y-%m-%d")]
         return self.date
+
 
 if __name__ == "__main__":
     if st is not None:
